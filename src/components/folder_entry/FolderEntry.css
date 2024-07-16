@@ -1,0 +1,11 @@
+.folder-entry{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 5px;
+}
+.check-box{
+    margin-right: 5px;
+}
+
