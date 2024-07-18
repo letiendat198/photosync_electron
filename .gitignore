@@ -27,3 +27,4 @@ dist-electron
 # Secrets
 electron/oauth/secret.json
 secret.json
+token.json

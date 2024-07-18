@@ -1,8 +1,7 @@
 import { app, BrowserWindow, shell, dialog, ipcMain } from 'electron'
 import path from 'node:path'
 import oauth from './oauth/oauth'
-
-const client_id = "<No LOL>"
+import ipc from './ipcHandle'
 
 if (!app.requestSingleInstanceLock()) {
   app.quit()
@@ -34,8 +33,10 @@ async function createWindow () {
     }
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(() => { 
+    ipc.renderToMainIPC()
     createWindow()
+    ipc.passWinRef(win)
 })
 
 app.on('second-instance', () => {

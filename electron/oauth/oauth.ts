@@ -4,8 +4,7 @@ import shell from 'electron'
 import crypto from 'crypto'
 import {Worker} from 'worker_threads'
 
-
-function request(client_id: string){
+function requestOauthToken(client_id: string){
     const oauthEndpoint = "https://accounts.google.com/o/oauth2/v2/auth"
 
     const redirectUri = "http://localhost:1908"
@@ -26,18 +25,31 @@ function request(client_id: string){
     shell.shell.openExternal(requestUrl)
 }
 
-function setupOauthCodeListener(callback: any){
+function setupOauthCodeListener(): Promise<any>{
     const worker = new Worker("./dist-electron/oauth_listener.js")
-    worker.on('message', (data) => {
-        callback(data)
-        worker.terminate()
+
+    return new Promise((resolve, reject) => {
+        let timer = setTimeout(() => {
+            worker.terminate()
+            reject(new Error("Listener timeout"))
+        }, 2*60000)
+        worker.on('message', (data) => {
+            if (data=='undefined' || data==null){
+                clearTimeout(timer)
+                reject(new Error("No code was returned to listener"))
+            }
+            clearTimeout(timer)
+            worker.terminate()
+            resolve(data)
+        }) 
     })
+    
 }
 
-function exchangeToken(client_id: string, client_secret: string, code: string){
+function exchangeToken(client_id: string, client_secret: string, code: string): Promise<any>{
     const tokenEndpoint = "https://oauth2.googleapis.com/token"
 
-    const redirectUri = "http://localhost:1909"
+    const redirectUri = "http://localhost:1908"
 
     const params = {
     "client_id": client_id,
@@ -49,26 +61,63 @@ function exchangeToken(client_id: string, client_secret: string, code: string){
 
     const urlParams: string = querystring.stringify(params)
 
-    const requestUrl: string = tokenEndpoint + "?" + urlParams
-
-    console.log(requestUrl)
-
-    shell.shell.openExternal(requestUrl)
+    return new Promise((resolve, reject) => {
+        let timer = setTimeout(()=>reject(new Error("Request timeout")), 5*60000)
+        fetch(tokenEndpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: urlParams
+        }).then((res) => res.json()).then((res) => {
+            console.log(res)
+            clearTimeout(timer)
+            try {
+                let tokenDetails = {
+                    access_token: res.access_token,
+                    expires_in: (res.expires_in - 10) + Math.round(Date.now()/1000),
+                    refresh_token: res.refresh_token
+                } 
+                resolve(tokenDetails)
+            }
+            catch(e){
+                reject(e)
+            }
+        })
+    })
+    
 }
 
-function setupTokenListener(callback: any){
-    const worker = new Worker("./dist-electron/token_listener.js")
-    worker.on('message', (data) => {
-        callback(data)
-        worker.terminate()
+function refreshToken(clientId: string, clientSecret: string, refreshToken: string): Promise<any>{
+    const refreshEndpoint = new URL("https://oauth2.googleapis.com/token")
+    let body = {
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: "refresh_token",
+        refresh_token: refreshToken
+    }
+
+    return new Promise((resolve, reject) => {
+        let timer = setTimeout(()=>reject(new Error("Request timeout")), 5*60000)
+        fetch(refreshEndpoint, {
+            method: 'POST',
+            body: JSON.stringify(body)
+        }).then((res) => res.json()).then((res) => {
+            clearTimeout(timer)
+            res.refresh_token = refreshToken // Add refresh_token back in cause response don't contain it
+            res.expires_in = (res.expires_in - 10) + Math.round(Date.now()/1000)
+            resolve(res)
+        })
     })
+
+    
 }
 
 const oauth = {
-    request,
+    requestOauthToken,
     exchangeToken,
     setupOauthCodeListener,
-    setupTokenListener,
+    refreshToken
 }
 
 export default oauth

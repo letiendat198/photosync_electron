@@ -16,23 +16,35 @@ import { Folder } from '@mui/icons-material';
 
 function App() {
   const [folders, setFolder] = useState<string[]>([])
+  let key = 0
+  const cancelFolder = (path: string) => {
+    console.log("Canceling folder", path)
+    let pathIndex = folders.indexOf(path)
+    console.log(pathIndex)
+    folders.splice(pathIndex, 1) // This will return deleted elements, not new array!
+    setFolder([...folders])
+  }
+
   return (
     <Container maxWidth={false} sx={{height: '100%', position: 'fixed'}}>
       <Grid container height='100%'>
-        <Grid item xs={4}>
+        <Grid item xs={6}>
           <Stack sx={{maxHeight: '97vh', overflow: 'auto'}}>
             <Stack direction='row' spacing={2}>
-              <IconButton onClick={async () => {
+              <Button variant='outlined' startIcon={<Add/>} 
+              onClick={async () => {
                 const folderPath = await window.electronAPI.openFolder()
-                setFolder([...folders, folderPath])
-              }}>
-                <Add/>
-              </IconButton>
+                if (folderPath != null ){
+                  key += 1
+                  setFolder([...folders, folderPath])
+                }
+              }}> Add a folder </Button>
               <Button component={Link} to="/setup">Setup</Button>  
             </Stack>
             {folders.map((item, index) => {
+              console.log(key)
               return (
-                <FolderEntry path={item}/>
+                <FolderEntry key={key} path={item} onCancel={cancelFolder}/>
               )
             })}
           </Stack>
@@ -40,7 +52,7 @@ function App() {
         <Grid item xs={1} container direction='row' alignItems='center' justifyContent='center'>
           <Divider orientation='vertical'/>
         </Grid>
-        <Grid item xs={7}>
+        <Grid item xs={5}>
           <Stack direction='column'>
             <FileEntry name='test.jpg' size='2MB' uploadTime='Today'/>
           </Stack> 
