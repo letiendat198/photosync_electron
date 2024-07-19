@@ -7,7 +7,7 @@ interface watchObject{
     abort: AbortController
 }
 
-var currentlyWatching: watchObject[] = [] // Global tracker
+var currentWatchList: watchObject[] = [] // Global tracker
 
 function startWatcher(path: string, callback: callbackFunction){
     const abortController = new AbortController()
@@ -16,20 +16,34 @@ function startWatcher(path: string, callback: callbackFunction){
         path: path,
         abort: abortController
     }
-    currentlyWatching.push(watchObj)
+    currentWatchList.push(watchObj)
 }
 
 function stopWatcher(path: string){
-    currentlyWatching.forEach((watchObj) => {
+    currentWatchList.forEach((watchObj, index) => {
         if (watchObj.path == path){
             watchObj.abort.abort()
             console.log("Watcher for %s has been aborted", path)
+            currentWatchList.splice(index, 1)
+            return
         }
+    })
+    console.log("Watch list after removal:", currentWatchList)
+}
+
+function getSimpleWatchList(): Promise<string[]>{
+    let simpleWatchList: string[] = []
+    return new Promise((resolve, reject) => {
+        if (currentWatchList.length == 0) resolve(simpleWatchList)
+        currentWatchList.forEach((watchObj, index) => {
+            simpleWatchList.push(watchObj.path)
+            if (index == currentWatchList.length - 1) resolve(simpleWatchList)
+        })
     })
 }
 
 function saveToJson(path: string){
-    let watchList = JSON.stringify(currentlyWatching)
+    let watchList = JSON.stringify(currentWatchList)
     fs.writeFile(path, watchList, {flag: 'w'}, (err)=>{
         if (err){
             console.log("Failed to save watch list to", path)
@@ -44,7 +58,7 @@ function loadFromJson(path: string){
             console.log("File doesn't exist!")
         }
         else{
-            currentlyWatching = JSON.parse(data.toString())
+            currentWatchList = JSON.parse(data.toString())
             console.log("Current watch list updated from source", path)
         }
     })
@@ -53,6 +67,7 @@ function loadFromJson(path: string){
 const watch = {
     startWatcher,
     stopWatcher,
+    getSimpleWatchList,
     saveToJson,
     loadFromJson
 }

@@ -6,7 +6,6 @@ import Typography from '@mui/material/Typography';
 import FolderOutlined from '@mui/icons-material/FolderOutlined';
 import Icon from '@mui/material/Icon';
 import { useState } from 'react';
-// import './FolderEntry.css'
 
 interface pathInformation{
     path: string
@@ -18,6 +17,7 @@ function FolderEntry(props: pathInformation){
     return (
         <Stack direction='row' alignItems='center' spacing={1}>
             <Checkbox defaultChecked onChange={(event) => {
+                console.log("Checkbox status changed")
                 props.onCancel(path)
                 const folderStatus = event.target.checked
                 window.electronAPI.folderStatusChange(folderStatus, path)  

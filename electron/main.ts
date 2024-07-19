@@ -13,14 +13,15 @@ let win: BrowserWindow
 async function createWindow () {
     win = new BrowserWindow({
         title: 'Main window',
-        width: 800,
+        width: 1000,
         height: 600,
         webPreferences: {
             preload: path.join(process.cwd(), 'dist-electron','preload.mjs'),
             nodeIntegration: false,
             nodeIntegrationInWorker: true,
             contextIsolation: true,
-            sandbox: true
+            sandbox: true,
+            webSecurity: false,
         }
     })
     if (app.isPackaged) {
@@ -29,7 +30,7 @@ async function createWindow () {
     } else {
         // Vite's dev server
         win.loadURL('http://localhost:5173')
-        // win.webContents.openDevTools()
+        win.webContents.openDevTools()
     }
 }
 

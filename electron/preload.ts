@@ -9,7 +9,8 @@ declare global{
 }
 
 type modalTextUpdateCallack = (text: string) => void
-type setupCompleteCallback = () => void
+type setupStatusCallback = () => void
+type fileUploadCallback = (fileDetails: any) => void
 
 contextBridge.exposeInMainWorld('electronAPI', {
   openFolder: () => ipcRenderer.invoke("fs:openFolder"),
@@ -18,5 +19,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   submitClientDetails: (client_id: string, client_secret: string) => ipcRenderer.send("event:submitClient", client_id, client_secret),
  
   onModalTextUpdate: (callback: modalTextUpdateCallack) => ipcRenderer.on('event:modalTextUpdate', (event, value) => callback(value)),
-  onSetupComplete: (callback: setupCompleteCallback) => ipcRenderer.on('event:setupComplete', (event, value) => callback()),
+  onSetupComplete: (callback: setupStatusCallback) => ipcRenderer.on('event:setupComplete', (event, value) => callback()),
+  onSetupFail: (callback: setupStatusCallback) => ipcRenderer.on('event:setupFail', (event, value) => callback()),
+  onFileUpload: (callback: fileUploadCallback) => ipcRenderer.on('event:fileUpload', (event, value) => callback(value)),
+  onFileUploadStatus: (callback: fileUploadCallback) => ipcRenderer.on('event:fileUploadStatus', (event, value) => callback(value)),
 })

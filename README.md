@@ -7,7 +7,7 @@ This is a rework of my old project [PhotoSync](https://www.github.com/letiendat1
 ## Features
 - Backup images and videos to Google Photos
 - Allow choosing which folder to backup
-- Convenient ON/OFF toogle in system tray
+- Convenient ON/OFF toggle in system tray
 - Custom backup notification (Maybe?) 
 
 ## TODO
@@ -17,13 +17,15 @@ This is a rework of my old project [PhotoSync](https://www.github.com/letiendat1
     - Done setup screen => OAuth works
     - Add folder to watch list works
     - File detection and upload works
+    - Fix removing folders
+    - Implement upload history and status
 
 </details>
 
-- Fix removing folders
 - Save and reload watch list on startup
 - Handle possible errors when doing OAuth and API
-- Implement upload history and status
+- Handle possible errors with upload status
+- Save upload history to disk and load it on startup
 - Implement custom notification
 - Implement tray toggle
 

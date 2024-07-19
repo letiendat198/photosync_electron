@@ -5,6 +5,7 @@ import watch from './fs_handle/watch'
 import hookEventWithUpload from './api_handle/uploadHook'
 
 var winRef: BrowserWindow|null = null
+let componentUniqueKey = 0
 
 function renderToMainIPC(){
     ipcMain.handle('fs:openFolder', async ()=> {
@@ -12,8 +13,17 @@ function renderToMainIPC(){
         const {canceled, filePaths} = await dialog.showOpenDialog({properties: ["openDirectory"]})
         if (!canceled){
             console.log(filePaths[0])
+
+            let watchList = await watch.getSimpleWatchList() // May race
+            console.log(watchList)
+            if (watchList.includes(filePaths[0])) return null
+
             hookEventWithUpload(filePaths[0])
-            return filePaths[0]
+            const pathDetails = {
+                path: filePaths[0],
+                key: componentUniqueKey++
+            }
+            return pathDetails
         }
         return null
     })
