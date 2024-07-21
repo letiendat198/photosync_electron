@@ -6,10 +6,24 @@ import Divider from '@mui/material/Divider';
 import { Typography } from '@mui/material';
 import FolderView from './components/folder_view/FolderView';
 import UploadView from './components/upload_view/UploadView';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 // import './debugCSS.css'
 
 function App() {
-  
+  // useEffect(() => {
+  //   let navigate = useNavigate()
+  //   window.electronAPI.onRouteSetup(() => {
+  //     navigate("/setup")
+  //   })
+  //   window.electronAPI.onRouteNotification(() => {
+  //     navigate("/notification")
+  //   })
+  //   return () => {
+  //     window.electronAPI.removeListenerForChannel('route:setup')
+  //     window.electronAPI.removeListenerForChannel('route:notification')
+  //   }
+  // }, [])
 
   return (
     <Container maxWidth={false} sx={{height: '100%', position: 'fixed'}}>

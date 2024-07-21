@@ -1,5 +1,8 @@
 import http from 'node:http'
 import mime from 'mime'
+import storage from '../oauth/storage'
+import ipc from '../ipcHandle'
+import oauth from '../oauth/oauth'
 
 
 var allowedImageTypes = ['AVIF', 'BMP', 'GIF', 'HEIC', 'ICO', 'JPG', 'PNG', 'TIFF', 'WEBP', 'RAW'] 
@@ -42,20 +45,15 @@ async function requestUploadToken(oauthToken: string, fileName: string, fileByte
             body: fileBytes
         }).then((res) => res.text()).then((data) => {
             clearTimeout(timer)
-            console.log("Upload token:",data)
             resolve(data)
         })    
     })
-    
 }
 
 async function uploadMedias(oauthToken: string, mediaItems: mediaItem[]): Promise<any>{
     let url = new URL("https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate")
     return new Promise((resolve, reject) => {
         let timer = setTimeout(()=>reject(new Error("Request timeout")), 2*60000)
-        console.log(JSON.stringify({
-            newMediaItems: mediaItems
-        }))
         fetch(url, {
             method: 'POST',
             headers: {
@@ -66,17 +64,16 @@ async function uploadMedias(oauthToken: string, mediaItems: mediaItem[]): Promis
                 newMediaItems: mediaItems
             })
         }).then((res) => {
-            if (res.ok){
-                clearTimeout(timer)
-                res.json()
+            if (res.ok || res.status == 207){
+                return res.json()
             }
             else{
-                clearTimeout(timer)
-                reject(new Error("Failed to create new media on Google Photoss"))
-            } 
-        }).then((data) =>{
-            console.log(data)
-            resolve(data)
+                reject(res.status)
+            }
+        }).then((data) => {
+            if (data instanceof Object){
+                resolve(data)
+            }
         })
     })
 }

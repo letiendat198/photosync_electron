@@ -21,6 +21,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onModalTextUpdate: (callback: modalTextUpdateCallack) => ipcRenderer.on('event:modalTextUpdate', (event, value) => callback(value)),
   onSetupComplete: (callback: setupStatusCallback) => ipcRenderer.on('event:setupComplete', (event, value) => callback()),
   onSetupFail: (callback: setupStatusCallback) => ipcRenderer.on('event:setupFail', (event, value) => callback()),
+
   onFileUpload: (callback: fileUploadCallback) => ipcRenderer.on('event:fileUpload', (event, value) => callback(value)),
   onFileUploadStatus: (callback: fileUploadCallback) => ipcRenderer.on('event:fileUploadStatus', (event, value) => callback(value)),
+
+  onRouteSetup: (callback: () => void) => ipcRenderer.on('route:setup', (event) => callback()),
+  onRouteNotification: (callback: () => void) => ipcRenderer.on('route:notification', (event) => callback()),
+
+  removeListenerForChannel: (channel: string) => ipcRenderer.removeAllListeners(channel)
 })

@@ -3,6 +3,7 @@ import installedFlow from './oauth/flow'
 import storage from './oauth/storage'
 import watch from './fs_handle/watch'
 import hookEventWithUpload from './api_handle/uploadHook'
+import createNotificationWindow from './notification'
 
 var winRef: BrowserWindow|null = null
 let componentUniqueKey = 0
@@ -56,22 +57,30 @@ function renderToMainIPC(){
     })
 }
 
-function passWinRef(win: BrowserWindow){
-    winRef = win
-}
-
 function mainToRenderIPC(channel: string, data: any){
-    if(winRef == null){
-        console.log("No renderer reference found!")
-        return
+    let allWindows = BrowserWindow.getAllWindows()
+    // if (allWindows.length == 0){
+    //     createNotificationWindow().then((win) => {
+    //         win.webContents.send('route:notification')
+    //         win.webContents.send(channel, data)
+    //     })
+    // }
+    for (let window of allWindows){
+        window.webContents.send(channel, data)
+        if (window.getTitle() == "Notification"){
+            window.show()
+            let offset = 100
+            let size: number[] = window.getSize()
+            window.setSize(size[0],size[1]+offset)
+            let pos: number[] = window.getPosition()
+            window.setPosition(pos[0], pos[1]-offset)
+        }
     }
-    winRef.webContents.send(channel, data)
 }
 
 const ipc = {
     mainToRenderIPC,
     renderToMainIPC,
-    passWinRef
 }
 
 export default ipc

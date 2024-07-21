@@ -19,14 +19,18 @@ This is a rework of my old project [PhotoSync](https://www.github.com/letiendat1
     - File detection and upload works
     - Fix removing folders
     - Implement upload history and status
+    - Implement a early state working custom notification
 
 </details>
 
+- Implement custom notification:
+    - Redesign custom title bar
+    - Not show notification when main app is open 
+    - An auto close mechanism
 - Save and reload watch list on startup
 - Handle possible errors when doing OAuth and API
 - Handle possible errors with upload status
 - Save upload history to disk and load it on startup
-- Implement custom notification
 - Implement tray toggle
 
 ## Known Issues

@@ -29,17 +29,17 @@ function FileEntry(props: fileInfo){
     return (
         <Paper className='file-entry'>
             <Grid container spacing={1}>
-                <Grid item xs={4} display='flex'>
+                <Grid item xs={5} sm={4} display='flex'>
                     <Box component='img' src={path} width='100%'/>    
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={5} sm={6}>
                 <Stack>
                         <Typography textOverflow='ellipsis' noWrap>Name: {name}</Typography>
                         <Typography>Size: {size}</Typography>
                         <Typography textOverflow='ellipsis' noWrap>Upload Time: {uploadTime}</Typography>      
                     </Stack>   
                 </Grid>
-                <Grid item xs = {2} position='relative'>
+                <Grid item xs={2} sm = {2} position='relative'>
                     {status!="pending"?
                     <Icon sx={{
                         position: 'absolute',
