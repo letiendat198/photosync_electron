@@ -4,6 +4,7 @@ import storage from './oauth/storage'
 import watch from './fs_handle/watch'
 import hookEventWithUpload from './api_handle/uploadHook'
 import createNotificationWindow from './notification'
+import notification from './notification'
 
 var winRef: BrowserWindow|null = null
 let componentUniqueKey = 0
@@ -55,6 +56,16 @@ function renderToMainIPC(){
         installedFlow(client_id, client_secret)
 
     })
+
+    ipcMain.on("event:closeNotification", (event) => {
+        let allWindows = BrowserWindow.getAllWindows()
+        for (let window of allWindows){
+            if (window.getTitle() == "Notification"){
+                window.hide()
+                notification.resetNotificationWindow()
+            }
+        }
+    })
 }
 
 function mainToRenderIPC(channel: string, data: any){
@@ -66,14 +77,13 @@ function mainToRenderIPC(channel: string, data: any){
     //     })
     // }
     for (let window of allWindows){
-        window.webContents.send(channel, data)
-        if (window.getTitle() == "Notification"){
-            window.show()
-            let offset = 100
-            let size: number[] = window.getSize()
-            window.setSize(size[0],size[1]+offset)
-            let pos: number[] = window.getPosition()
-            window.setPosition(pos[0], pos[1]-offset)
+        console.log(window.getTitle())
+        if (window.getTitle()!="Notification") window.webContents.send(channel, data)
+        if ( window.getTitle()=="Notification" && !allWindows[0].isVisible()){
+            window.webContents.send(channel, data)
+            if (channel=="event:fileUpload"){
+                notification.expandNotificationByOne()   
+            }
         }
     }
 }

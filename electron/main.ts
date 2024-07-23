@@ -1,8 +1,9 @@
-import { app, BrowserWindow, shell, dialog, ipcMain } from 'electron'
+import { app, BrowserWindow, shell, dialog, ipcMain, Tray, Menu } from 'electron'
 import path from 'node:path'
 import oauth from './oauth/oauth'
 import ipc from './ipcHandle'
-import createNotificationWindow from './notification'
+import notification from './notification'
+import "../public/image.ico"
 
 if (!app.requestSingleInstanceLock()) {
   app.quit()
@@ -10,6 +11,7 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 let win: BrowserWindow
+let tray: Tray
 
 async function createWindow () {
     win = new BrowserWindow({
@@ -29,7 +31,10 @@ async function createWindow () {
     win.on('page-title-updated', (event) => {
         event.preventDefault()
     })
-    createNotificationWindow()
+    win.on('close', (event) => {
+        event.preventDefault()
+        win.hide()
+    })
 
     if (app.isPackaged) {
         // win.removeMenu()
@@ -42,7 +47,21 @@ async function createWindow () {
 }
 
 app.whenReady().then(() => { 
+    tray = new Tray(path.join(process.cwd(), "public/image.ico"))
+    const contextMenu = Menu.buildFromTemplate([
+        {label: "Open", type: "normal", click: () => {
+            if(win){
+               win.show() 
+               win.focus
+            } 
+        }},
+        {label: "Exit", type: "normal", click: () => app.exit()}
+    ])
+
+    tray.setContextMenu(contextMenu)
+
     ipc.renderToMainIPC()
+    notification.createNotificationWindow()
     createWindow()
 })
 
@@ -58,12 +77,17 @@ app.on('window-all-closed', () => {
     // if (process.platform !== 'darwin') app.quit()
 })
 
-app.on('activate', () => {
-    const allWindows = BrowserWindow.getAllWindows()
-    if (allWindows.length) {
-        allWindows[0].focus()
-    } 
-    else {
-        createWindow()
-    }
-})
+// app.on('activate', () => {
+//     const allWindows = BrowserWindow.getAllWindows()
+//     if (allWindows.length==0 || (allWindows.length==1 && allWindows[0].getTitle()=="Notification")){
+//         if (allWindows.length==0) notification.createNotificationWindow()
+//         createWindow()
+//     }
+//     else{
+//         for (let window of allWindows){
+//             if (window.getTitle()!="Notification"){
+//                 window.focus()
+//             }
+//         }
+//     }
+// })

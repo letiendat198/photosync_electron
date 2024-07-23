@@ -18,6 +18,11 @@ interface fileStatus {
 function UploadView(){
     const [files, setFiles] = useState<fileDetails[]>([])
     const [status, setStatus] = useState<fileStatus>({[-1]: "pending"})
+
+    const reset = () => {
+        setFiles([])
+        setStatus({[-1]: "pending"})
+    }
     
     useEffect(() => {     
         window.electronAPI.onFileUpload((fileDetails: fileDetails) => {

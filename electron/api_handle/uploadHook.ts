@@ -30,7 +30,10 @@ function hookEventWithUpload(watchPath: string){
                     }
                     console.log(fileDetails)
                     
-                    queueFileForUpload(fileDetails)
+                    let retryTimer = setInterval(() => {
+                        let isQueued = queueFileForUpload(fileDetails)
+                        if (isQueued) clearInterval(retryTimer)
+                    }, 1000)
                 }
             })
         }
@@ -54,6 +57,9 @@ interface fileDetails{
 interface uploadKeyLookup{
     [uploadToken: string]: number
 }
+
+// A queue and poll basically make async calls sync again
+// => Able to upload to Google's server more efficiently and less likely to be refused
 
 var fileUploadQueue: fileDetails[] = []
 var fileUploadQueueLock = false

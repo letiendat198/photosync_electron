@@ -8,7 +8,7 @@ This is a rework of my old project [PhotoSync](https://www.github.com/letiendat1
 - Backup images and videos to Google Photos
 - Allow choosing which folder to backup
 - Convenient ON/OFF toggle in system tray
-- Custom backup notification (Maybe?) 
+- Custom backup notification
 
 ## TODO
 <details>
@@ -20,21 +20,24 @@ This is a rework of my old project [PhotoSync](https://www.github.com/letiendat1
     - Fix removing folders
     - Implement upload history and status
     - Implement a early state working custom notification
+    - Implement custom notification:
+        - Redesign custom title bar
+        - Not show notification when main app is open 
+        - An auto close mechanism
 
 </details>
 
-- Implement custom notification:
-    - Redesign custom title bar
-    - Not show notification when main app is open 
-    - An auto close mechanism
 - Save and reload watch list on startup
 - Handle possible errors when doing OAuth and API
 - Handle possible errors with upload status
-- Save upload history to disk and load it on startup
-- Implement tray toggle
+- ~~Save upload history to disk and load it on startup~~ (Not a good idea)
+- Implement tray toggle:
+    - ~~Implemented open main window~~
+    - ~~Implemented quitting the app entirely~~
+    - ON/OFF toggle to turn of sync
 
 ## Known Issues
-- Will add when the dust has settled
+- Sometimes a notification entry will be invisible?
 
 ## License
 

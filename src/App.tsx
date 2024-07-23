@@ -11,19 +11,19 @@ import { useNavigate } from 'react-router-dom';
 // import './debugCSS.css'
 
 function App() {
-  // useEffect(() => {
-  //   let navigate = useNavigate()
-  //   window.electronAPI.onRouteSetup(() => {
-  //     navigate("/setup")
-  //   })
-  //   window.electronAPI.onRouteNotification(() => {
-  //     navigate("/notification")
-  //   })
-  //   return () => {
-  //     window.electronAPI.removeListenerForChannel('route:setup')
-  //     window.electronAPI.removeListenerForChannel('route:notification')
-  //   }
-  // }, [])
+  let navigate = useNavigate()
+  useEffect(() => {
+    window.electronAPI.onRouteSetup(() => {
+      navigate("/setup")
+    })
+    window.electronAPI.onRouteNotification(() => {
+      navigate("/notification")
+    })
+    return () => {
+      window.electronAPI.removeListenerForChannel('route:setup')
+      window.electronAPI.removeListenerForChannel('route:notification')
+    }
+  }, [])
 
   return (
     <Container maxWidth={false} sx={{height: '100%', position: 'fixed'}}>
@@ -35,7 +35,7 @@ function App() {
         <Grid item xs={1} container direction='row' alignItems='center' justifyContent='center'>
           <Divider orientation='vertical'/>
         </Grid>
-        <Grid item xs={5}>
+        <Grid item xs={5} height='97vh' overflow='auto'>
           <Typography variant='h6'>Upload History</Typography>
           <UploadView/>
         </Grid>

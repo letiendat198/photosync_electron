@@ -68,10 +68,12 @@ async function uploadMedias(oauthToken: string, mediaItems: mediaItem[]): Promis
                 return res.json()
             }
             else{
+                clearTimeout(timer)
                 reject(res.status)
             }
         }).then((data) => {
             if (data instanceof Object){
+                clearTimeout(timer)
                 resolve(data)
             }
         })
