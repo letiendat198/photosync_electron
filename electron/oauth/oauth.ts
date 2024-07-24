@@ -2,6 +2,7 @@ import https from 'https'
 import querystring from 'querystring' 
 import shell from 'electron'
 import crypto from 'crypto'
+import oauthCodeListener from './oauth_listener'
 import {Worker} from 'worker_threads'
 
 function requestOauthToken(client_id: string){
@@ -23,27 +24,6 @@ function requestOauthToken(client_id: string){
     console.log(requestUrl)
 
     shell.shell.openExternal(requestUrl)
-}
-
-function setupOauthCodeListener(): Promise<any>{
-    const worker = new Worker("./dist-electron/oauth_listener.js")
-
-    return new Promise((resolve, reject) => {
-        let timer = setTimeout(() => {
-            worker.terminate()
-            reject(new Error("Listener timeout"))
-        }, 2*60000)
-        worker.on('message', (data) => {
-            if (data=='undefined' || data==null){
-                clearTimeout(timer)
-                reject(new Error("No code was returned to listener"))
-            }
-            clearTimeout(timer)
-            worker.terminate()
-            resolve(data)
-        }) 
-    })
-    
 }
 
 function exchangeToken(client_id: string, client_secret: string, code: string): Promise<any>{
@@ -116,7 +96,6 @@ function refreshToken(clientId: string, clientSecret: string, refreshToken: stri
 const oauth = {
     requestOauthToken,
     exchangeToken,
-    setupOauthCodeListener,
     refreshToken
 }
 

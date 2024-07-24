@@ -18,11 +18,6 @@ interface fileStatus {
 function UploadView(){
     const [files, setFiles] = useState<fileDetails[]>([])
     const [status, setStatus] = useState<fileStatus>({[-1]: "pending"})
-
-    const reset = () => {
-        setFiles([])
-        setStatus({[-1]: "pending"})
-    }
     
     useEffect(() => {     
         window.electronAPI.onFileUpload((fileDetails: fileDetails) => {
@@ -55,7 +50,7 @@ function UploadView(){
     }, [])
 
     return(
-        <Stack direction='column' spacing={2}>
+        <Stack direction='column' spacing={1.5}>
             {files.map((fileDetails, index) => {
                 console.log("Add a component with name %s and key %d", fileDetails.name, fileDetails.key)
                 console.log("Component with key %d have status:", fileDetails.key, status[fileDetails.key])

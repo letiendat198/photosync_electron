@@ -3,10 +3,10 @@ import path from 'node:path'
 
 var notificationWindow: BrowserWindow
 let width = 400
-let height = 50
+let height = 45
 let timer: NodeJS.Timeout | null = null
 
-async function createNotificationWindow (): Promise<BrowserWindow> {
+async function createNotificationWindow (preloadPath: string, indexPath: string): Promise<BrowserWindow> {
     let defaultScreen = screen.getPrimaryDisplay()
     let screenSize = defaultScreen.workAreaSize
     console.log(screenSize)
@@ -14,26 +14,26 @@ async function createNotificationWindow (): Promise<BrowserWindow> {
     notificationWindow = new BrowserWindow({
         title: 'Notification',
         alwaysOnTop: true,
+        skipTaskbar: true,
         frame: false,
         width: 0,
         height: 0,
         webPreferences: {
-            preload: path.join(process.cwd(), 'dist-electron','preload.mjs'),
+            preload: preloadPath,
             nodeIntegration: false,
             contextIsolation: true,
             sandbox: true,
             webSecurity: false, // set to true for production
         }
     })
-    notificationWindow.hide()
-    notificationWindow.setPosition(screenSize.width-width,screenSize.height-height)
-    notificationWindow.setSize(width, height)
+    
+
     notificationWindow.on('page-title-updated', (event) => {
         event.preventDefault()
     })    
     if (app.isPackaged) {
         // win.removeMenu()
-        notificationWindow.loadFile('../dist/index.html')
+        notificationWindow.loadFile(indexPath)
     } else {
         // Vite's dev server
         notificationWindow.loadURL('http://localhost:5173/')
@@ -41,6 +41,11 @@ async function createNotificationWindow (): Promise<BrowserWindow> {
     return new Promise((resolve, reject) => {
         notificationWindow.on('ready-to-show', (event: any) => {
             notificationWindow.webContents.send('route:notification')
+            // Need to route first then hide so that first entry not disappear
+            notificationWindow.hide()
+            notificationWindow.setPosition(screenSize.width-width,screenSize.height-height)
+            notificationWindow.setSize(width, height)
+
             resolve(notificationWindow)
         })
     })
@@ -66,7 +71,7 @@ function timelimitedShow(){
 
 function expandNotificationByOne(){
     timelimitedShow()
-    let offset = 105
+    let offset = 103
     let size: number[] = notificationWindow.getSize()
     if (size[1]>offset*3) return
     

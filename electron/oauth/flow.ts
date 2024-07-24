@@ -1,13 +1,14 @@
 import oauth from "./oauth";
 import storage from "./storage";
 import ipc from '../ipcHandle'
+import oauthCodeListener from "./oauth_listener";
 
 async function installedFlow(client_id: string, client_secret: string){
     // Get OAuth code
     ipc.mainToRenderIPC('event:modalTextUpdate', "Waiting for user approval")
 
     oauth.requestOauthToken(client_id)
-    let code = await oauth.setupOauthCodeListener() 
+    let code = await oauthCodeListener() 
     console.log(code)
     // Exchange OAuth code for Access Token
     ipc.mainToRenderIPC('event:modalTextUpdate', "Getting Access Token from Google")

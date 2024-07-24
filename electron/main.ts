@@ -1,17 +1,29 @@
-import { app, BrowserWindow, shell, dialog, ipcMain, Tray, Menu } from 'electron'
+import { app, BrowserWindow, Tray, Menu } from 'electron'
 import path from 'node:path'
-import oauth from './oauth/oauth'
 import ipc from './ipcHandle'
 import notification from './notification'
-import "../public/image.ico"
+import watch from './fs_handle/watch'
+import hookEventWithUpload from './api_handle/uploadHook'
+import storage from './oauth/storage'
+
+
+declare global{
+    var syncEnabled: boolean
+}
 
 if (!app.requestSingleInstanceLock()) {
-  app.quit()
-  process.exit(0)
+    console.log("Another instance of this app is already running. Please close it")
+    app.quit()
+    process.exit(0)
 }
 
 let win: BrowserWindow
 let tray: Tray
+
+let preloadPath = app.isPackaged?path.join(process.cwd(), "resources", "app.asar", "dist-electron", "preload.mjs")
+:path.join(process.cwd(), "dist-electron", "preload.mjs")
+let indexPath = app.isPackaged?path.join(process.cwd(), "resources", "app.asar", "dist", "index.html")
+:path.join(process.cwd(), "dist", "index.html")
 
 async function createWindow () {
     win = new BrowserWindow({
@@ -19,13 +31,19 @@ async function createWindow () {
         width: 1000,
         height: 600,
         webPreferences: {
-            preload: path.join(process.cwd(), 'dist-electron','preload.mjs'),
+            preload: preloadPath,
             nodeIntegration: false,
             nodeIntegrationInWorker: true,
             contextIsolation: true,
             sandbox: true,
             webSecurity: false, // set to true for production
         }
+    })
+
+    win.on('ready-to-show', () => {
+        storage.loadClient().catch(() => {
+            win.webContents.send('route:setup')
+        })
     })
 
     win.on('page-title-updated', (event) => {
@@ -38,16 +56,22 @@ async function createWindow () {
 
     if (app.isPackaged) {
         // win.removeMenu()
-        win.loadFile('../dist/index.html')
+        win.loadFile(indexPath)
     } else {
         // Vite's dev server
         win.loadURL('http://localhost:5173')
-        win.webContents.openDevTools()
+        // win.webContents.openDevTools()
     }
 }
 
 app.whenReady().then(() => { 
-    tray = new Tray(path.join(process.cwd(), "public/image.ico"))
+    globalThis.syncEnabled = true
+
+    // Setup tray icon
+    let on_image = path.join(process.cwd(), "public", "image_on.ico")
+    let off_image = path.join(process.cwd(), "public", "image_off.ico")
+    tray = new Tray(on_image)
+    tray.setToolTip("Photosync: ON")
     const contextMenu = Menu.buildFromTemplate([
         {label: "Open", type: "normal", click: () => {
             if(win){
@@ -55,13 +79,26 @@ app.whenReady().then(() => {
                win.focus
             } 
         }},
+        {type:"separator"},
         {label: "Exit", type: "normal", click: () => app.exit()}
     ])
 
     tray.setContextMenu(contextMenu)
+    tray.on('click', (event) => {    
+        globalThis.syncEnabled = !globalThis.syncEnabled
+        tray.setImage(globalThis.syncEnabled?on_image:off_image)
+        tray.setToolTip("Photosync: ".concat(globalThis.syncEnabled?"ON":"OFF"))
+    })
+
+    // Load watch list from disk
+    watch.loadFromJson().then((watchList) => {
+        for (let folder of watchList){
+            hookEventWithUpload(folder)
+        }
+    }).catch((err) => console.log(err))
 
     ipc.renderToMainIPC()
-    notification.createNotificationWindow()
+    notification.createNotificationWindow(preloadPath, indexPath)
     createWindow()
 })
 
@@ -72,22 +109,3 @@ app.on('second-instance', () => {
         win.focus()
     }
 })
-
-app.on('window-all-closed', () => {
-    // if (process.platform !== 'darwin') app.quit()
-})
-
-// app.on('activate', () => {
-//     const allWindows = BrowserWindow.getAllWindows()
-//     if (allWindows.length==0 || (allWindows.length==1 && allWindows[0].getTitle()=="Notification")){
-//         if (allWindows.length==0) notification.createNotificationWindow()
-//         createWindow()
-//     }
-//     else{
-//         for (let window of allWindows){
-//             if (window.getTitle()!="Notification"){
-//                 window.focus()
-//             }
-//         }
-//     }
-// })

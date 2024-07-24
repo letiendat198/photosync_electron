@@ -28,3 +28,7 @@ dist-electron
 electron/oauth/secret.json
 secret.json
 token.json
+
+# Local stuffs
+watch.json
+releases

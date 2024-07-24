@@ -41,16 +41,23 @@ function SetupScreen(){
         checkCachedSecret()
     }, [])
 
-    window.electronAPI.onModalTextUpdate((text: string) => {
-        console.log("event:modalTextUpdate invoked")
-        setModalText(text)
-    })
+    useEffect(() => {
+        window.electronAPI.onModalTextUpdate((text: string) => {
+            console.log("event:modalTextUpdate invoked")
+            setModalText(text)
+        })
 
-    window.electronAPI.onSetupComplete(() => {
-        console.log("event:setupComplete invoked")
-        setSetupState(true)
-        setTimeout(()=>navigate("/"),5000)
-    })
+        window.electronAPI.onSetupComplete(() => {
+            console.log("event:setupComplete invoked")
+            setSetupState(true)
+            setTimeout(()=>navigate("/"),5000)
+        })    
+        return () => {
+            window.electronAPI.removeListenerForChannel('event:modalTextUpdate')
+            window.electronAPI.removeListenerForChannel('event:setupComplete')
+        }
+    }, [])
+    
 
     return (
         <Box display='flex' alignItems='center' justifyContent='center' width='100%' height='100%' position='fixed'>
@@ -69,7 +76,11 @@ function SetupScreen(){
                         setSetupState(false)
                         handleOpen()
                     }}>Submit</Button>
-                    <Button variant='outlined'>Import secret.json</Button>
+                    <Button variant='outlined' onClick={ async () => {
+                        let secrets = await window.electronAPI.importSecret()
+                        setClientID(secrets.clientID)
+                        setClientSecret(secrets.clientSecret)
+                    }}>Import secret.json</Button>
                 </Stack>  
             </Stack>
             <Modal open={modalOpen} aria-labelledby="modal-title" disableEscapeKeyDown>

@@ -17,6 +17,7 @@ function startWatcher(path: string, callback: callbackFunction){
         abort: abortController
     }
     currentWatchList.push(watchObj)
+    saveToJson()
 }
 
 function stopWatcher(path: string){
@@ -42,26 +43,30 @@ function getSimpleWatchList(): Promise<string[]>{
     })
 }
 
-function saveToJson(path: string){
-    let watchList = JSON.stringify(currentWatchList)
-    fs.writeFile(path, watchList, {flag: 'w'}, (err)=>{
+async function saveToJson(){
+    let watchList = JSON.stringify(await getSimpleWatchList())
+    fs.writeFile('watch.json', watchList, {flag: 'w'}, (err)=>{
         if (err){
-            console.log("Failed to save watch list to", path)
+            console.log("Failed to save watch list to watch.json")
         }
-        else console.log("Saved current watch list to", path)
+        else console.log("Saved current watch list to watch.json")
     })
 }
 
-function loadFromJson(path: string){
-    fs.readFile(path, {flag: 'rx'}, (err, data) => {
-        if (err){
-            console.log("File doesn't exist!")
-        }
-        else{
-            currentWatchList = JSON.parse(data.toString())
-            console.log("Current watch list updated from source", path)
-        }
+function loadFromJson(): Promise<any>{
+    return new Promise((resolve, reject) => {
+        fs.readFile('watch.json', {flag: 'r'}, (err, data) => {
+            if (err){
+                console.log("File doesn't exist!")
+                reject(err)
+            }
+            else{
+                resolve(JSON.parse(data.toString()))
+                console.log("Current watch list updated from source watch.json")
+            }
+        })    
     })
+    
 }
 
 const watch = {

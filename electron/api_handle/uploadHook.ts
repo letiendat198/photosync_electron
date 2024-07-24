@@ -6,15 +6,14 @@ import fs from 'node:fs'
 import ipc from "../ipcHandle";
 import path from 'node:path'
 import url from 'node:url'
-import fsPromise from "../fs_handle/fsPromise";
 
 let componentUniqueKey = 0
 
 function hookEventWithUpload(watchPath: string){
     if (timer==null) pollUploadQueue()
     watch.startWatcher(watchPath, (event, fileName) => {
-        // On file event in watched folder
-        if (event == 'rename' && fileName!=null){
+        // On file event in watched folder and sync must be enabled
+        if (event == 'rename' && fileName!=null && globalThis.syncEnabled){
             console.log("Event rename happened for file", fileName)
             fs.readFile(path.join(watchPath, fileName), async (err, buffer) => {
                 if (err){
@@ -86,7 +85,7 @@ function pollUploadQueue(){
 
         for (let fileDetails of fileUploadQueue){       
             ipc.mainToRenderIPC('event:fileUpload', fileDetails)
-            let buffer = await fsPromise.readFilePromise(url.fileURLToPath(fileDetails.pathURL))
+            let buffer = await fs.promises.readFile(url.fileURLToPath(fileDetails.pathURL))
             if (buffer != null){
                 let uploadToken = await photosAPI.requestUploadToken(tokenDetails.access_token, fileDetails.name, buffer)
                 let newMediaItem: mediaItem = {
@@ -100,40 +99,44 @@ function pollUploadQueue(){
                 uploadKey[uploadToken] = fileDetails.key  
             }
         }
-        photosAPI.uploadMedias(tokenDetails.access_token, mediaItems).then((res) => {
-            for (let mediaResult of res.newMediaItemResults){
-                if (mediaResult.status.code == undefined){
-                    console.log("Successfully uploaded: ", uploadKey[mediaResult.uploadToken])
-                    ipc.mainToRenderIPC('event:fileUploadStatus', {
-                        key: uploadKey[mediaResult.uploadToken], 
-                        status: "success"
-                    })
-                }
-                else{
-                    console.log("Failed to upload %d with reason: ", uploadKey[mediaResult.uploadToken], mediaResult.status.message)
-                    ipc.mainToRenderIPC('event:fileUploadStatus', {
-                        key: uploadKey[res.uploadToken], 
-                        status: "failed"
-                    })
-                }
-            }
-
-            fileUploadQueue = []
-            fileUploadQueueLock = false
-        }).catch((err) => {
-            console.log("Failed to upload all items to Google Photos:",err)
-            for (let fileDetails of fileUploadQueue){
-                ipc.mainToRenderIPC('event:fileUploadStatus', {
-                    key: fileDetails.key, 
-                    status: "failed"
-                })
-            }
-            fileUploadQueue = []
-            fileUploadQueueLock = false
-        })
+        uploadMedias(tokenDetails, mediaItems, uploadKey)
         // fileUploadQueue = []
         // fileUploadQueueLock = false
     }, 5000)
+}
+
+async function uploadMedias(tokenDetails: any, mediaItems: mediaItem[], uploadKey: uploadKeyLookup){
+    photosAPI.uploadMedias(tokenDetails.access_token, mediaItems).then((res) => {
+        for (let mediaResult of res.newMediaItemResults){
+            if (mediaResult.status.code == undefined){
+                console.log("Successfully uploaded: ", uploadKey[mediaResult.uploadToken])
+                ipc.mainToRenderIPC('event:fileUploadStatus', {
+                    key: uploadKey[mediaResult.uploadToken], 
+                    status: "success"
+                })
+            }
+            else{
+                console.log("Failed to upload %d with reason: ", uploadKey[mediaResult.uploadToken], mediaResult.status.message)
+                ipc.mainToRenderIPC('event:fileUploadStatus', {
+                    key: uploadKey[res.uploadToken], 
+                    status: "failed"
+                })
+            }
+        }
+
+        fileUploadQueue = []
+        fileUploadQueueLock = false
+    }).catch((err) => {
+        console.log("Failed to upload all items to Google Photos:",err)
+        for (let fileDetails of fileUploadQueue){
+            ipc.mainToRenderIPC('event:fileUploadStatus', {
+                key: fileDetails.key, 
+                status: "failed"
+            })
+        }
+        fileUploadQueue = []
+        fileUploadQueueLock = false
+    })
 }
 
 async function getAccessTokenAndRefresh(){

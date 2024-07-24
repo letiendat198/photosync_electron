@@ -1,8 +1,7 @@
 import Add from "@mui/icons-material/Add"
 import Button from "@mui/material/Button"
 import Stack from "@mui/material/Stack"
-import { useState } from "react"
-import { Link } from "react-router-dom"
+import { useEffect, useState } from "react"
 import FolderEntry from "../folder_entry/FolderEntry"
 
 interface folderDetails{
@@ -11,7 +10,7 @@ interface folderDetails{
   }
 
 function FolderView(){
-    const [folders, setFolder] = useState<folderDetails[]>([]) // USE SET INSTEAD
+    const [folders, setFolder] = useState<folderDetails[]>([])
 
     const cancelFolder = (path: string) => {
         console.log("Canceling folder", path)
@@ -21,6 +20,13 @@ function FolderView(){
         })
         setFolder(filteredFolder)
     }
+
+    useEffect(() => {
+        window.electronAPI.fetchCurrentWatchlist().then((watchList: folderDetails[]) => {
+            setFolder(watchList)
+        })
+    }, [])
+
     return(
         <Stack sx={{maxHeight: '97vh', overflow: 'auto'}}>
             <Stack direction='row' spacing={2}>
@@ -31,7 +37,6 @@ function FolderView(){
                     setFolder([...folders, folderDetails])
                 }
                 }}> Add a folder </Button>
-                <Button component={Link} to="/setup">Setup</Button>  
             </Stack>
             {folders.map((item, index) => {
                 console.log("Add an entry for path %s with key", item.path, item.key)
