@@ -7,34 +7,10 @@ This is a rework of my old project [PhotoSync](https://www.github.com/letiendat1
 All features are functional by now (though things may fail because I haven't done any errors handling)
 
 ## Screenshots
-<div class="overflow-table">
-<table width=100%>
-    <tr>
-        <td width=50%><img src="images/promo1.png"></td>
-        <td width=50%><img src="images/promo2.png"></td>
-        <td width=50%><img src="images/promo3.png"></td>
-        <td width=50%><img src="images/promo4.png"></td>
-    </tr>
-    <tr>
-        <td>Setup</td>
-        <td>Setup Successful</td>
-        <td>Main App</td>
-        <td>Notification</td>
-    </tr>
-</table>
 
-</div>
-
-<style>
-    .overflow-table{
-        overflowX: scroll;
-        width: 100%
-    }
-    td{
-        text-align: center;
-        vertical-align: middle;
-    }
-</style>
+|Setup|Setup Successful|Main App|Notification|
+|---|---|---|---|
+|![Promo1](images/promo1.png)|![Promo2](images/promo2.png)|![Promo3](images/promo3.png)|![Promo4](images/promo4.png)|
 
 ## Features
 - Backup images and videos to Google Photos
