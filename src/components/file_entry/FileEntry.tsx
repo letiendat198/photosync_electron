@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import { Box, CircularProgress, Container, Grid, Icon, Stack } from '@mui/material';
+import { Box, CircularProgress, Container, Grid, Icon, Stack, Tooltip } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CheckIcon from '@mui/icons-material/Check'
 import CloseIcon from '@mui/icons-material/Close';
@@ -34,9 +34,24 @@ function FileEntry(props: fileInfo){
                 </Grid>
                 <Grid item xs={5} sm={6}>
                 <Stack>
-                        <Typography textOverflow='ellipsis' noWrap>Name: {name}</Typography>
+                    <Tooltip title={name} placement='top-end' slotProps={{popper: {modifiers:[{
+                        name: 'offset',
+                        options: {
+                            offset: [0,-14]
+                        }
+                    }]}}}>
+                        <Typography textOverflow='ellipsis' noWrap>Name: {name}</Typography>    
+                    </Tooltip>
                         <Typography>Size: {size}</Typography>
-                        <Typography textOverflow='ellipsis' noWrap>Upload Time: {uploadTime}</Typography>      
+                    <Tooltip title={uploadTime} placement='top-end' slotProps={{popper: {modifiers:[{
+                        name: 'offset',
+                        options: {
+                            offset: [0,-14]
+                        }
+                    }]}}}>
+                        <Typography textOverflow='ellipsis' noWrap>Upload Time: {uploadTime}</Typography>   
+                    </Tooltip>
+                           
                     </Stack>   
                 </Grid>
                 <Grid item xs={2} sm = {2} position='relative'>

@@ -28,15 +28,15 @@ let indexPath = app.isPackaged?path.join(process.cwd(), "resources", "app.asar",
 async function createWindow () {
     win = new BrowserWindow({
         title: 'Photosync Electron',
-        width: 1000,
-        height: 600,
+        width: 810,
+        height: 550,
         webPreferences: {
             preload: preloadPath,
             nodeIntegration: false,
             nodeIntegrationInWorker: true,
             contextIsolation: true,
             sandbox: true,
-            webSecurity: false, // set to true for production
+            webSecurity: app.isPackaged?true:false, // set to true for production
         }
     })
 
@@ -52,6 +52,9 @@ async function createWindow () {
     win.on('close', (event) => {
         event.preventDefault()
         win.hide()
+    })
+    win.on('resized', () => {
+        console.log(win.getSize())
     })
 
     if (app.isPackaged) {

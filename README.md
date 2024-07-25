@@ -12,6 +12,16 @@ All features are functional by now (though things may fail because I haven't don
 - Convenient ON/OFF toggle in system tray
 - Custom backup notification
 
+## How to use
+- Download a build at [releases](https://www.github.com/letiendat198/photosync_electron/releases/)
+- Make sure you have your own Google API OAuth credential. For how to create one, please refer to [this](https://developers.google.com/photos/library/guides/get-started) guide
+**Note**: In step 2 (Request an OAuth 2.0 client ID), set the **application type** to **Desktop** and skip the rest of the guide
+
+-  Enter your client ID and client secret when prompted and you're all set
+- To completely exit, check your system tray (bottom right corner of the taskbar) for a photo icon. Right click => Exit
+- **Warning**: This app stores your credentials in **plain text JSON files**. Although your credentials stay on your machine and only used when communicating with Google, there exists a chance that they can be stolen if your computer or network is compromised. **Only use credentials associated with a FREE Google Cloud account with this application**
+
+
 ## TODO
 <details>
     <summary>Already done</summary>
@@ -33,11 +43,13 @@ All features are functional by now (though things may fail because I haven't don
         - ON/OFF toggle to turn of sync
     - Save and reload watch list on startup
     - Detect when setup is needed
+    - Added tooltip to show overflown text
 
 </details>
 
 - Handle possible errors when doing OAuth and API
 - Handle possible errors with upload status
+- Use ffmpeg to support video formats that Google doesn't support
 
 ## Known Issues
 <details>
@@ -47,8 +59,10 @@ All features are functional by now (though things may fail because I haven't don
 
 </details>
 
-- Will add when found
+- High memory consumption (~ 200MB)
 
 ## License
 
-GPLv3 as always
+    Photosync Electron is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+    This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>. 
