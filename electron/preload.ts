@@ -23,7 +23,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   importSecret: () => ipcRenderer.invoke('event:importSecret'),
   onModalTextUpdate: (callback: modalTextUpdateCallack) => ipcRenderer.on('event:modalTextUpdate', (event, value) => callback(value)),
   onSetupComplete: (callback: setupStatusCallback) => ipcRenderer.on('event:setupComplete', (event, value) => callback()),
-  onSetupFail: (callback: setupStatusCallback) => ipcRenderer.on('event:setupFail', (event, value) => callback()),
+  onSetupFail: (callback: modalTextUpdateCallack) => ipcRenderer.on('event:setupFail', (event, error) => callback(error)),
 
   // Watch list events
   fetchCurrentWatchlist: () => ipcRenderer.invoke('event:fetchWatchlist'),

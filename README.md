@@ -50,11 +50,12 @@ All features are functional by now (though things may fail because I haven't don
     - Save and reload watch list on startup
     - Detect when setup is needed
     - Added tooltip to show overflown text
+    - Handle possible errors when doing OAuth
+    - Handle possible errors when doing API
+    - Handle possible errors with upload status
 
 </details>
 
-- Handle possible errors when doing OAuth and API
-- Handle possible errors with upload status
 - Use ffmpeg to support video formats that Google doesn't support
 
 ## Known Issues
@@ -65,7 +66,7 @@ All features are functional by now (though things may fail because I haven't don
 
 </details>
 
-- High memory consumption (~ 200MB)
+- ~~High memory consumption~~ (~ 200MB when first launched, ~ 60MB when idle)
 
 ## License
 

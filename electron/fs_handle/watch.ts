@@ -30,6 +30,7 @@ function stopWatcher(path: string){
         }
     })
     console.log("Watch list after removal:", currentWatchList)
+    saveToJson()
 }
 
 function getSimpleWatchList(): Promise<string[]>{

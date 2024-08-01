@@ -15,7 +15,7 @@ function oauthCodeListener(): Promise<string>{
         let timer = setTimeout(() => {
             server.close()
             reject(new Error("Listener timeout"))
-        }, 5*6000)
+        }, 2*60000)
         server.on('request',(req, res) => {
             console.log(req.url)
             res.writeHead(200)

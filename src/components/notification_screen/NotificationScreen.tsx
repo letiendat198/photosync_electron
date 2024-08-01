@@ -20,7 +20,7 @@ function NotificationScreen(){
     // Reseting component with key change is dark magic!
     return (
         <Stack spacing={1}>
-            <AppBar position="sticky" sx={{zIndex: 10}}>
+            <AppBar position="sticky" sx={{zIndex: 10}} elevation={0}>
                 <Toolbar>
                     <Typography sx={{flexGrow: 1}}>Uploading new images...</Typography>
                     <IconButton color="inherit" onClick={() => {

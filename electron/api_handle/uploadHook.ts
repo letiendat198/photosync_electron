@@ -8,10 +8,14 @@ import path from 'node:path'
 import url from 'node:url'
 
 let componentUniqueKey = 0
+var resetTimer = false
 
 function hookEventWithUpload(watchPath: string){
-    if (timer==null) pollUploadQueue()
     watch.startWatcher(watchPath, (event, fileName) => {
+        if (timer==null || resetTimer){
+            console.log("Init poll upload interval")
+            pollUploadQueue() 
+        } 
         // On file event in watched folder and sync must be enabled
         if (event == 'rename' && fileName!=null && globalThis.syncEnabled){
             console.log("Event rename happened for file", fileName)
@@ -74,11 +78,26 @@ function queueFileForUpload(fileDetails: fileDetails): boolean{
 
 function pollUploadQueue(){
     timer = setInterval(async () => {
+        resetTimer = false
+        // console.log("Polling upload queue. Length: %d, Locked?: %s", fileUploadQueue.length, fileUploadQueueLock)
         if (fileUploadQueue.length == 0 || fileUploadQueueLock) return
         console.log("Current queue: ", fileUploadQueue.length)
         fileUploadQueueLock = true
 
-        let tokenDetails = await getAccessTokenAndRefresh()
+        let tokenDetails: any | null = null
+        try{
+            tokenDetails = await getAccessTokenAndRefresh()    
+        }
+        catch(err){
+            console.log(err)
+            ipc.mainToRenderIPC('route:setup', null) 
+            if(timer) clearInterval(timer)
+            resetTimer = true
+            fileUploadQueueLock = false
+            fileUploadQueue = []
+            return
+        }
+        
 
         let mediaItems: mediaItem[] = []
         let uploadKey: uploadKeyLookup = {"": -1} 
@@ -141,16 +160,27 @@ async function uploadMedias(tokenDetails: any, mediaItems: mediaItem[], uploadKe
 
 async function getAccessTokenAndRefresh(){
     // Load access token
-    let tokenDetails = await storage.loadAccessToken()
+    let tokenDetails: any | null = null
+    try {
+        tokenDetails = await storage.loadAccessToken()    
+    }
+    catch(err){
+        throw err
+    }
+    
     // Check access token expiry status
-    if (Math.round(Date.now()/1000) >= tokenDetails.expires_in){
+    if (tokenDetails != null && Math.round(Date.now()/1000) >= tokenDetails.expires_in){
         console.log("access_token expired, refreshing")
         // Refresh access token if expired
-        let clientDetails = await storage.loadClient()
-        tokenDetails = await oauth.refreshToken(clientDetails.client_id, 
-            clientDetails.client_secret, tokenDetails.refresh_token)
-        // Store new access token
-        storage.storeAccessToken(tokenDetails)
+        try{
+            let clientDetails = await storage.loadClient()
+            tokenDetails = await oauth.refreshToken(clientDetails.client_id, 
+                clientDetails.client_secret, tokenDetails.refresh_token)    
+            storage.storeAccessToken(tokenDetails)    
+        }
+        catch(err){
+            throw err
+        }
     }
     return tokenDetails
 }

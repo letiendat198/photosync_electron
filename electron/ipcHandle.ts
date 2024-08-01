@@ -111,7 +111,9 @@ function mainToRenderIPC(channel: string, data: any){
     for (let window of allWindows){
         console.log(window.getTitle())
         if (window.getTitle()!="Notification") window.webContents.send(channel, data)
-        if ( window.getTitle()=="Notification" && !allWindows[0].isVisible()){
+        // Notification won't get new data if main window is active
+        // Notification must not route to setup
+        if ( window.getTitle()=="Notification" && !allWindows[0].isVisible() && channel!="route:setup"){
             console.log("Message sent to Notification view")
             window.webContents.send(channel, data)
             if (channel=="event:fileUpload"){

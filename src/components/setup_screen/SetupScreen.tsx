@@ -14,6 +14,7 @@ import Paper from '@mui/material/Paper'
 import Fab from '@mui/material/Fab'
 import { Icon } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
+import CloseIcon from '@mui/icons-material/Close'
 import CheckCircleRounderIcon from '@mui/icons-material/CheckCircleRounded'
 
 // import './SetupScreen.css'
@@ -28,7 +29,11 @@ function SetupScreen(){
     const handleClose = () => setModalOpen(false)
 
     const [modalText, setModalText] = useState("")
-    const [setupState, setSetupState] = useState(false)
+    const [setupState, setSetupState] = useState("pending")
+
+    const allowCloseModalIfFail = () => {
+        if (setupState=="fail") handleClose()
+    }
 
     useEffect(() => {
         async function checkCachedSecret(){
@@ -49,12 +54,19 @@ function SetupScreen(){
 
         window.electronAPI.onSetupComplete(() => {
             console.log("event:setupComplete invoked")
-            setSetupState(true)
+            setSetupState("success")
             setTimeout(()=>navigate("/"),5000)
-        })    
+        })
+        
+        window.electronAPI.onSetupFail((error: string) => {
+            console.log("event:setupFail invoked")
+            setSetupState("fail")
+            setModalText(error)
+        })
         return () => {
             window.electronAPI.removeListenerForChannel('event:modalTextUpdate')
             window.electronAPI.removeListenerForChannel('event:setupComplete')
+            window.electronAPI.removeListenerForChannel('event:setupFail')
         }
     }, [])
     
@@ -73,7 +85,7 @@ function SetupScreen(){
                 <Stack direction='row' spacing={2}>
                     <Button variant='contained' onClick={() => {
                         window.electronAPI.submitClientDetails(clientID, clientSecret)
-                        setSetupState(false)
+                        setSetupState("pending")
                         handleOpen()
                     }}>Submit</Button>
                     <Button variant='outlined' onClick={ async () => {
@@ -83,7 +95,7 @@ function SetupScreen(){
                     }}>Import secret.json</Button>
                 </Stack>  
             </Stack>
-            <Modal open={modalOpen} aria-labelledby="modal-title" disableEscapeKeyDown>
+            <Modal open={modalOpen} onClose={allowCloseModalIfFail} aria-labelledby="modal-title" disableEscapeKeyDown>
                 <Box sx={{
                     position: 'absolute',
                     top: '50%',
@@ -95,9 +107,9 @@ function SetupScreen(){
                     <Card>
                         <Stack direction='column' alignItems='center' justifyContent='center' spacing={2} marginBottom='5%' marginTop='5%'>
                             <Typography id="modal-title" variant='h6' component='h2'>Requesting API Access</Typography>                                                    
-                            {!setupState?(<CircularProgress/>):(
-                                <Fab color='success'>
-                                    <CheckIcon/>
+                            {setupState=="pending"?(<CircularProgress/>):(
+                                <Fab color={setupState=="success"?"success":"error"}>
+                                    {setupState=="success"?<CheckIcon/>:<CloseIcon/>}
                                 </Fab>   
                             )}
                             <Typography>{modalText}</Typography>

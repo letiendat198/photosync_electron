@@ -42,7 +42,7 @@ function exchangeToken(client_id: string, client_secret: string, code: string): 
     const urlParams: string = querystring.stringify(params)
 
     return new Promise((resolve, reject) => {
-        let timer = setTimeout(()=>reject(new Error("Request timeout")), 5*60000)
+        let timer = setTimeout(()=>reject(new Error("Request timeout")), 2*60000)
         fetch(tokenEndpoint, {
             method: 'POST',
             headers: {
@@ -78,7 +78,7 @@ function refreshToken(clientId: string, clientSecret: string, refreshToken: stri
     }
 
     return new Promise((resolve, reject) => {
-        let timer = setTimeout(()=>reject(new Error("Request timeout")), 5*60000)
+        let timer = setTimeout(()=>reject(new Error("Request timeout")), 2*60000)
         fetch(refreshEndpoint, {
             method: 'POST',
             body: JSON.stringify(body)

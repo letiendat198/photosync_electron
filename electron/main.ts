@@ -41,7 +41,10 @@ async function createWindow () {
     })
 
     win.on('ready-to-show', () => {
-        storage.loadClient().catch(() => {
+        storage.loadClient().then( async ()=>{
+            await storage.loadAccessToken()
+        })
+        .catch(() => {
             win.webContents.send('route:setup')
         })
     })
@@ -79,7 +82,7 @@ app.whenReady().then(() => {
         {label: "Open", type: "normal", click: () => {
             if(win){
                win.show() 
-               win.focus
+               win.focus()
             } 
         }},
         {type:"separator"},
